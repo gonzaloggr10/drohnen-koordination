@@ -9,8 +9,8 @@ void mape(vector<Drone> *pListOfDrones)
 {
 	// Deklaration Counter
 	int i, j, n;
-	// TODO: Diese Parametern werden hier zum zweiten Mal deklariert
-	int ndRef = 4;
+	// Bemerkung: Diese Parametern werden hier zum zweiten Mal deklariert
+	int ndRef = 5;
 	int gwRef = 300;
 	//Deklaration des Vektor-Iterators
 	vector<Drone>::iterator it;
@@ -50,8 +50,6 @@ void mape(vector<Drone> *pListOfDrones)
 			{
 				if (j > i)
 				{
-					// TODO: Komponenten des Vektors dynamisch erstellen: Umgang mit variabler Drohnenzahl ermöglichen. 
-					// Aktuelles Problem: Name?
 					if (calcDist(*pListOfDrones, i, j) < gwRef)
 					{
 						(pListStart + i)->setID((pListStart + i)->getID() + 1);
@@ -61,12 +59,6 @@ void mape(vector<Drone> *pListOfDrones)
 				}
 			}
 		}
-
-		// Ausdrücken für Debugging
-		/*for (i = 0; i != ndRef; ++i)
-		{
-		std::cout << "Drone " << (pListStart + i)->getWeight() << "  id  " << (pListStart + i)->getID() << std::endl;
-		}*/
 
 		/*
 		ANALYSIS
@@ -78,37 +70,46 @@ void mape(vector<Drone> *pListOfDrones)
 		//"Violated Goals" detektieren und goalViolated Variable auf "true" setzen
 		for (i = 0; i != ndRef; ++i)
 		{
-			if ((pListStart + i)->getID())
+			/*
+			Bei dieser Bedingung wir überprufen: 
+			1. Der Abstand zwischen dieser Drohne und irgendanderen Drohne ist kleiner als erlaub
+			2. Diese Drohne befindet sich nicht dabei, ihr Z-Ziel zu erreichen
+			*/
+			if ((pListStart + i)->getID() && (pListStart + i)->getTargetZActive() == false)
 			{
 				(pListStart + i)->setGoalViolated(true);
 				(pListStart + i)->setColorGreen();
 			}
 			else if ((pListStart + i)->getID() == 0)
+			// Bemerkung: Wir beziehen jetzt die zweite Bedingung nicht ein, da,  wenn das der Fall wäre, würden die Drohnen weiß, die
+			// sich in der Z-Achse bewegen. Das hat dpch jetzt eine wichtige Folge: die "goalViolated" Flag wird in diesen Drohnen auf true
+			// bleiben. Darauf werden wird im nächsten Tel aufpassen müssen -> (Oder, wir lassen die "goalViolated" Variable automatisch auf
+			// false schalten, wenn "targetZActive" auf true ist) -> Nicht gemacht, um rigoros zu bleiben
 			{
 				(pListStart + i)->setGoalViolated(false);
 				(pListStart + i)->setColorWhite();
 			}
 		}
 
-
-		/*
-		PLAN
-		*********************************************************************
-		*********************************************************************
-		*********************************************************************
-		*/
-
-		// TODO: Das was wir jetzt machen ist doof: Wir wussten schon welche Drohnen hatten ein Ziel verletzt
+		// Bemerkung: Das was wir jetzt machen ist doof: Wir wussten schon welche Drohnen hatten ein Ziel verletzt
 		triggerPlan = false;
 		for (i = 0; i != ndRef; ++i)
 		{
-			if ((pListStart + i)->getGoalViolated())
+			if ((pListStart + i)->getGoalViolated() && (pListStart + i)->getTargetZActive() == false)
 			{
 				triggerPlan = true;
 			}
 		}
+
+			/*
+			PLAN
+			*********************************************************************
+			*********************************************************************
+			*********************************************************************
+			*/
+
 		// for-Schleife zum Zurücksetzen zu 0 des "corridor vector"s
-		// TODO: Optimieren: Rauskriegen, wie man mit der vector-Klasse den Komponenten direkt Werte zuweist.
+		// Optimieren: Rauskriegen, wie man mit der vector-Klasse den Komponenten direkt Werte zuweist.
 
 		if (triggerPlan)
 		{
@@ -120,7 +121,7 @@ void mape(vector<Drone> *pListOfDrones)
 			// Aufbau von corrVect (Vector of corridors) und Zuweisung des aktuellen Korridors zu jeder Drohne (in der Klasse)
 			for (it = pListOfDrones->begin(); it != pListOfDrones->end(); it++)
 			{
-				if (it->getGoalViolated())
+				if (it->getGoalViolated() && it->getTargetZActive() == false)
 				{
 					for (i = 0; i < nc; i++)
 					{
@@ -168,7 +169,7 @@ void mape(vector<Drone> *pListOfDrones)
 						if (*(corrVectStart + j) == 0 && freeCorrFlag == false)
 						{
 							// Jetzt nehmen wir eine Zuweisung der neuen Höhe für die leichteste Drohne vor
-							(pListStart + lightestDrone)->setZ(50 + j * corrHeight + corrHeight / 2);
+							(pListStart + lightestDrone)->setZGoal(50 + j * corrHeight + corrHeight / 2);
 							std::cout << "Drone " << lightestDrone << " to corr" << j << std::endl;
 							freeCorrFlag = true;
 							// Wir müssen jetzt sowohl corrVect (Vector of corridors) als auch die Zuweisung des Korridors zur Drohne aktualisieren
@@ -192,7 +193,23 @@ void mape(vector<Drone> *pListOfDrones)
 			}
 		}
 		
-		
+		/*
+		EXECUTION
+		*********************************************************************
+		*********************************************************************
+		*********************************************************************
+		*/
+		// Hier geht's um einen zum Teil redundanten Schritt, der ermöglicht uns jedoch, die Planning & Exectution Phasen zu trennen
+		for (i = 0; i != ndRef; ++i)
+		{
+			//std::cout << (pListStart + i)->getTargetZActive() << std::endl;
+			if ((pListStart + i)->getTargetZActive())
+			{
+				(pListStart + i)->setExecuteActive(true);
+			}
+
+		}
+
 		/*std::cout << "\n\n" << std::endl;
 		for (i = 0; i < nc; i++)
 		{

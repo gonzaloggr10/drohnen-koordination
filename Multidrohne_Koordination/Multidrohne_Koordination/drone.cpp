@@ -12,14 +12,26 @@ Drone::Drone(float startX, float startY, float startZ, vector<Vector2f> tl, int 
 	weight = intWeight;	
 	flag = 1;
 	goalViolated = false;
+	
 
 	// Wir definieren die entsprechende Geschwindigkeiten dem ersten Ziel zufolge
 	xVelocity = calcVelocity(currTarget).x;
 	yVelocity = calcVelocity(currTarget).y;
 
-	//Mit den Eingabedaten definieren wir den "RectangleShape" Objekt an der Stelle
+	// Mit den Eingabedaten definieren wir den "RectangleShape" Objekt an der Stelle
 	droneShape.setSize(Vector2f(90 * z / 100, 90 * z / 100)); // 90 ist die maximale Größe und 100 ist die Normalisierungskoeffizient
 	droneShape.setPosition(position);
+	// Nötige Elemente für die Anzeige des Textes
+	// Damit den Text oben auf den Drohnen angezeigt wird, machen wir extra eine Variable dazu
+	positionText = position;
+	positionText.y -= 25;
+	font.loadFromFile("Wedgie Regular.ttf");
+	droneText.setFont(font);
+	droneText.setString("120");
+	droneText.setCharacterSize(20);
+	//droneText.setStyle(sf::Text::Bold);
+	droneText.setFillColor(sf::Color::Yellow);
+	droneText.setPosition(position);
 }
 FloatRect Drone::getPosition()
 {
@@ -29,6 +41,10 @@ RectangleShape Drone::getShape()
 {
 	return droneShape;
 }
+Text Drone::getText()
+{
+	return droneText;
+}
 void Drone::setColorGreen()
 {
 	droneShape.setFillColor(Color(Color::Green));
@@ -37,10 +53,39 @@ void Drone::setColorWhite()
 {
 	droneShape.setFillColor(Color(Color::White));
 }
-void Drone::setZ(float zSet)
+void Drone::setZGoal(float zSetGoal)
 {
-	z = zSet;
-	droneShape.setSize(Vector2f(25 * z / 100, 25 * z / 100)); // 25 ist die maximale Größe und 100 ist die Normalisierungskoeffizient
+	zGoal = zSetGoal;
+	// Wenn ein Ziel für die Drohne zugewiesen wird, bewegt sich die Drohne entlang die Z-Achse solange targetZActive auf "true" gesetzt ist
+	targetZActive = true;
+	Drone::setZVelocity();
+}
+bool Drone::getTargetZActive()
+{
+	return targetZActive;
+}
+void Drone::setTargetZActive(bool ztarget)
+{
+	targetZActive = ztarget;
+}
+void Drone::setZVelocity()
+{
+	if (zGoal > z)
+	{
+		zVelocity = .5f;
+	}
+	else if (zGoal < z)
+	{
+		zVelocity = -.5f;
+	}
+}
+bool Drone::getExecuteActive()
+{
+	return executeActive;
+}
+void Drone::setExecuteActive(bool executeValue)
+{
+	executeActive = executeValue;
 }
 float Drone::getZ()
 {
@@ -101,6 +146,20 @@ void Drone::update()
 	// Updatet die Positionvariablen der Drohne
 	position.x += xVelocity;
 	position.y += yVelocity;
+	positionText = position;
+	positionText.y -= 25;
+	// Wenn ein Ziel für die Drohne zugewiesen wird, bewegt sich die Drohne entlang die Z-Achse solange targetZActive auf "true" gesetzt ist
+	if(executeActive)
+	{
+		z += zVelocity;
+		if (z > zGoal - 1 && z < zGoal + 1)
+		{
+			executeActive = false;
+			targetZActive = false;
+		}
+	}
+	
+	
 
 	// Bedingung: Ziel erreicht: Die Drohne steht innerhalb die definierten Grenzen in den x- und y-Achsen
 	if (position.x > currTarget.x - 30 && position.x < currTarget.x + 30 && position.y > currTarget.y - 30 && position.y < currTarget.y + 30)
@@ -134,4 +193,10 @@ void Drone::update()
 
 	// Bewegt die Drohne
 	droneShape.setPosition(position);
+	droneShape.setSize(Vector2f(80 * z / 100, 80 * z / 100)); // 80 ist die maximale Größe und 100 ist die Normalisierungskoeffizient
+	// Bewegt den Text
+	droneText.setPosition(positionText);
+	// Aktualisiert den Text
+	heightString = to_string(int(z));
+	droneText.setString(heightString);
 }

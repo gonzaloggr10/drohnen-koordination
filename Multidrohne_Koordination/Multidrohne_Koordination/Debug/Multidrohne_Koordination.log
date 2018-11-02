@@ -1,3 +1,7 @@
-﻿  mape.cpp
-c:\users\gonzalo\source\projects\multidrohne_koordination\multidrohne_koordination\mape.cpp(171): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+﻿  main.cpp
+c:\users\gonzalo\source\projects\multidrohne_koordination\multidrohne_koordination\main.cpp(83): warning C4101: 'j': unreferenced local variable
+c:\users\gonzalo\source\projects\multidrohne_koordination\multidrohne_koordination\main.cpp(83): warning C4101: 'i': unreferenced local variable
+  mape.cpp
+c:\users\gonzalo\source\projects\multidrohne_koordination\multidrohne_koordination\mape.cpp(172): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+  Generating Code...
   Multidrohne_Koordination.vcxproj -> C:\Users\Gonzalo\source\Projects\Multidrohne_Koordination\Debug\Multidrohne_Koordination.exe
