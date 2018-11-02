@@ -12,7 +12,9 @@ Drone::Drone(float startX, float startY, float startZ, vector<Vector2f> tl, int 
 	weight = intWeight;	
 	flag = 1;
 	goalViolated = false;
-	
+
+	// Etablierung der Grenzwert
+	gw = 200;
 
 	// Wir definieren die entsprechende Geschwindigkeiten dem ersten Ziel zufolge
 	xVelocity = calcVelocity(currTarget).x;
@@ -21,15 +23,23 @@ Drone::Drone(float startX, float startY, float startZ, vector<Vector2f> tl, int 
 	// Mit den Eingabedaten definieren wir den "RectangleShape" Objekt an der Stelle
 	droneShape.setSize(Vector2f(90 * z / 100, 90 * z / 100)); // 90 ist die maximale Größe und 100 ist die Normalisierungskoeffizient
 	droneShape.setPosition(position);
+	// Wir angeben manche Einstellungen für die Darstellung der Auren
+	positionAura = position;
+	positionAura.x -= gw;
+	positionAura.y -= gw;
+	droneAura.setRadius(gw);
+	droneAura.setFillColor(Color(Color::Transparent));
+	droneAura.setOutlineColor(sf::Color::Blue);
+	droneAura.setOutlineThickness(0.2);
+	droneAura.setPosition(positionAura);
 	// Nötige Elemente für die Anzeige des Textes
 	// Damit den Text oben auf den Drohnen angezeigt wird, machen wir extra eine Variable dazu
 	positionText = position;
 	positionText.y -= 25;
-	font.loadFromFile("Wedgie Regular.ttf");
+	font.loadFromFile("RockoFLF.ttf");
 	droneText.setFont(font);
 	droneText.setString("120");
 	droneText.setCharacterSize(20);
-	//droneText.setStyle(sf::Text::Bold);
 	droneText.setFillColor(sf::Color::Yellow);
 	droneText.setPosition(position);
 }
@@ -40,6 +50,10 @@ FloatRect Drone::getPosition()
 RectangleShape Drone::getShape()
 {
 	return droneShape;
+}
+CircleShape Drone::getDroneAura()
+{
+	return droneAura;
 }
 Text Drone::getText()
 {
@@ -146,8 +160,13 @@ void Drone::update()
 	// Updatet die Positionvariablen der Drohne
 	position.x += xVelocity;
 	position.y += yVelocity;
+
 	positionText = position;
 	positionText.y -= 25;
+
+	positionAura = position;
+	positionAura.x -= gw;
+	positionAura.y -= gw;
 	// Wenn ein Ziel für die Drohne zugewiesen wird, bewegt sich die Drohne entlang die Z-Achse solange targetZActive auf "true" gesetzt ist
 	if(executeActive)
 	{
@@ -175,13 +194,15 @@ void Drone::update()
 			itT = listOfTargets.begin();
 			flag = 0;
 		}
-
+		// Solche Methode funktioniert, weil, sobald die Drohne die Grenze überschreitet, 
 		if (itT != listOfTargets.end())
 		{
 			currTarget = *itT;
 			// Aktualisierung der Geschwindigeit
 			xVelocity = calcVelocity(currTarget).x;
 			yVelocity = calcVelocity(currTarget).y;
+			// Das funktioniert anders als gewöhnlich: hier wird die Variable inkrementiert, damit wir diesen neuen Wert bei der nächste Runde 
+			// benutzen können
 			itT++;
 		}
 		else
@@ -193,7 +214,9 @@ void Drone::update()
 
 	// Bewegt die Drohne
 	droneShape.setPosition(position);
-	droneShape.setSize(Vector2f(80 * z / 100, 80 * z / 100)); // 80 ist die maximale Größe und 100 ist die Normalisierungskoeffizient
+	droneShape.setSize(Vector2f(25 * z / 100, 25 * z / 100)); // 25 ist die maximale Größe und 100 ist die Normalisierungskoeffizient
+	// Bewegt die Aura
+	droneAura.setPosition(positionAura);
 	// Bewegt den Text
 	droneText.setPosition(positionText);
 	// Aktualisiert den Text

@@ -11,7 +11,7 @@ void mape(vector<Drone> *pListOfDrones)
 	int i, j, n;
 	// Bemerkung: Diese Parametern werden hier zum zweiten Mal deklariert
 	int ndRef = 5;
-	int gwRef = 300;
+	int gwRef = 200;
 	//Deklaration des Vektor-Iterators
 	vector<Drone>::iterator it;
 	vector<Drone>::iterator pListStart = pListOfDrones->begin();

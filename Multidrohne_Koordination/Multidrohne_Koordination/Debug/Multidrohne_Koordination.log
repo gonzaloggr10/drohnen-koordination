@@ -1,7 +1,12 @@
-﻿  main.cpp
+﻿C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\IDE\VC\VCTargets\Microsoft.CppBuild.targets(391,5): warning MSB8028: The intermediate directory (Debug\) contains files shared from another project (Multidrohne_Koordination.vcxproj).  This can lead to incorrect clean and rebuild behavior.
+  stdafx.cpp
+  Base.cpp
+  drone.cpp
+c:\users\gonzalo\source\projects\multidrohne_koordination\multidrohne_koordination\drone.cpp(33): warning C4305: 'argument': truncation from 'double' to 'float'
+  main.cpp
 c:\users\gonzalo\source\projects\multidrohne_koordination\multidrohne_koordination\main.cpp(83): warning C4101: 'j': unreferenced local variable
 c:\users\gonzalo\source\projects\multidrohne_koordination\multidrohne_koordination\main.cpp(83): warning C4101: 'i': unreferenced local variable
   mape.cpp
 c:\users\gonzalo\source\projects\multidrohne_koordination\multidrohne_koordination\mape.cpp(172): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
   Generating Code...
-  Multidrohne_Koordination.vcxproj -> C:\Users\Gonzalo\source\Projects\Multidrohne_Koordination\Debug\Multidrohne_Koordination.exe
+  Multidrohne_Koordination.vcxproj -> C:\Users\Gonzalo\source\Projects\Multidrohne_Koordination\Debug\Drohnen_Koordination_Zentral.exe
