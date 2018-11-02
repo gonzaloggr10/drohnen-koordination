@@ -1,0 +1,3 @@
+﻿  mape.cpp
+c:\users\gonzalo\source\projects\multidrohne_koordination\multidrohne_koordination\mape.cpp(171): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+  Multidrohne_Koordination.vcxproj -> C:\Users\Gonzalo\source\Projects\Multidrohne_Koordination\Debug\Multidrohne_Koordination.exe
