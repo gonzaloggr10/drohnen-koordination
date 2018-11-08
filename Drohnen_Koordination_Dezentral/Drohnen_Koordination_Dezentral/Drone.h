@@ -26,7 +26,7 @@ private:
 	int areaTag;
 
 	// Ein Objekt "droneShape" gennant der Klasse "RectangleShape" 
-	RectangleShape droneShape;
+	CircleShape droneShape;
 	Text droneText;
 	// Definition eines CircleShape-Objekts für die Darstellung der Auren
 	CircleShape droneAura;
@@ -52,13 +52,13 @@ public:
 
 	FloatRect getPosition();				// getter Funktion. Erhaltet die Position des Rechteckes vom droneShape Objekt
 
-	RectangleShape getShape();				// getter Funktion. Erhaltet die Variable droneShape vom Typ RectangleShape
+	CircleShape getShape();				// getter Funktion. Erhaltet die Variable droneShape vom Typ RectangleShape
 
 	CircleShape getDroneAura();
 
 	Text getText();
 
-	void setColorGreen();					// setter funktion. setzt eine farbe für die drohne (weiß)
+	void setColorRed();					// setter funktion. setzt eine farbe für die drohne (weiß)
 	void setColorWhite();					// setter Funktion. Setzt eine Farbe für die Drohne (Grün)
 
 	float getZ();							// getter Funktion für die Flughöhe

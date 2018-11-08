@@ -1,2 +1,4 @@
-﻿  main.cpp
+﻿  mape.cpp
+c:\users\gonzalo\source\projects\drohnen_koordination_dezentral\drohnen_koordination_dezentral\mape.cpp(149): warning C4554: '&': check operator precedence for possible error; use parentheses to clarify precedence
+c:\users\gonzalo\source\projects\drohnen_koordination_dezentral\drohnen_koordination_dezentral\mape.cpp(256): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
   Drohnen_Koordination_Dezentral.vcxproj -> C:\Users\Gonzalo\source\Projects\Drohnen_Koordination_Dezentral\Debug\Drohnen_Koordination_Dezentral.exe

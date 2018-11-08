@@ -6,16 +6,16 @@ using namespace sf;
 class Base {
 private:
 	Vector2f position;
-	float radius;
+	float side;
 
-	CircleShape baseShape;
+	RectangleShape baseShape;
 public:
 	Base();
 	Base(float, float, float);
 
 	Vector2f getPosition();
-	CircleShape getShape();
-	float getRadius();
+	RectangleShape getShape();
+	/*float getRadius();*/
 
 	~Base();
 

@@ -10,6 +10,11 @@ void mape(vector<Drone> *pListOfDrones, int aTag)
 	// Definition der Variable für's Gebiet-Tag
 	// Deklaration Counter
 	int i, j, n;
+	// Nummer Drohnen im Gebiet Counter
+	int dronesHere;
+	// Variable, die es uns ermöglicht, auf das Aufhören der Bewegungen der Drohnen zu warten und nur dann die GoalViolated-Variablen wieder auf
+	// "false" zu setzen
+	bool anyDroneMoves = false;
 	// Bemerkung: Diese Parametern werden hier zum zweiten Mal deklariert
 	int ndRef = 5;
 	int cDMape = 200;
@@ -42,25 +47,62 @@ void mape(vector<Drone> *pListOfDrones, int aTag)
 		*********************************************************************
 		*********************************************************************
 		*/
+		
+		// Initialisierung auf 0 des Drohnen-Im-Gebiet Counters
+		dronesHere = 0;
+		// Wir setzen erstmal diese Variable auf false, aber bestimmen nachher in der Schleife, ob das so bleiben soll
+		anyDroneMoves = false;
+
+		for (i = 0; i != ndRef; ++i)
+		{
+			if ((pListStart + i)->getAreaTag() == aTag)
+			{
+				dronesHere++;
+			}
+		}
+		// for-Schleife, die prüft, ob sich irgendeine Drohne im Gebiet noch bewegt bzw. ein Z-Zeil hat
+		for (i = 0; i != ndRef; ++i)
+		{
+			// Diese Bedingung besagt, wenn erst nur eine Drohne ihre Varialbe Execute auf "true" hat, setzen wir anyDroneMoves auf "true".
+			if ((pListStart + i)->getExecuteActive() && (pListStart + i)->getAreaTag() == aTag)
+			{
+				anyDroneMoves = true;
+			}
+
+		}
+		// Wenn hier anyDroneMoves auf "false" ist, bedeutet das, dass entweder haben all die Drohnen ihre Ziele erreicht oder die schon OK waren
+		if (anyDroneMoves == false)
+		{
+			for (i = 0; i != ndRef; ++i)
+			{
+				if ((pListStart + i)->getAreaTag() == aTag)
+				{
+					//std::cout << "Wieder auf weiss" << std::endl;
+					(pListStart + i)->setGoalViolated(false);
+					(pListStart + i)->setColorWhite();
+				}
+
+			}
+		}
 
 		// for-Schleife für die Durchfürung des Überprüfungsvorgang
 		// BEMERKUNG: Das ist eine andere Weg, eine Schleife zum Bearbeitung einer vector_Variable vorzunehmen aber nur mithilfe dem pListStart-Iterator. 
-		for (i = 0; i != ndRef - 1; ++i)
-		{
-			for (j = 1; j != ndRef; ++j)
-			{
-				// Wir überprüfen, dass sowohl die i-Drohne als auch die j-Drohne zu diesem Gebiet gehören
-				if (j > i && (pListStart + i)->getAreaTag() == aTag && (pListStart + j)->getAreaTag() == aTag)
-				{
-					if (calcDist(*pListOfDrones, i, j) < cDMape)
-					{
-						(pListStart + i)->setID((pListStart + i)->getID() + 1);
-						(pListStart + j)->setID((pListStart + j)->getID() + 1);
+		//for (i = 0; i != ndRef - 1; ++i)
+		//{
+		//	for (j = 1; j != ndRef; ++j)
+		//	{
+		//		// Wir überprüfen, dass sowohl die i-Drohne als auch die j-Drohne zu diesem Gebiet gehören
+		//		if (j > i && (pListStart + i)->getAreaTag() == aTag && (pListStart + j)->getAreaTag() == aTag)
+		//		{
+		//			if (calcDist(*pListOfDrones, i, j) < cDMape)
+		//			{
+		//				(pListStart + i)->setID((pListStart + i)->getID() + 1);
+		//				(pListStart + j)->setID((pListStart + j)->getID() + 1);
 
-					}
-				}
-			}
-		}
+		//			}
+		//		}
+		//	}
+		//}
 
 		/*
 		ANALYSIS
@@ -69,41 +111,75 @@ void mape(vector<Drone> *pListOfDrones, int aTag)
 		*********************************************************************
 		*/
 
-		//"Violated Goals" detektieren und goalViolated Variable auf "true" setzen
-		for (i = 0; i != ndRef; ++i)
-		{
-			/*
-			Bei dieser Bedingung wir überprufen:
-			1. Der Abstand zwischen dieser Drohne und irgendanderen Drohne ist kleiner als erlaub
-			2. Diese Drohne befindet sich nicht dabei, ihr Z-Ziel zu erreichen
-			3. Die Drohne gehört zu diesem Gebiet
-			*/
-			if ((pListStart + i)->getID() && (pListStart + i)->getTargetZActive() == false && (pListStart + i)->getAreaTag() == aTag)
-			{
-				(pListStart + i)->setGoalViolated(true);
-				(pListStart + i)->setColorGreen();
-			}
-			else if ((pListStart + i)->getID() == 0 && (pListStart + i)->getAreaTag() == aTag)
-				// Bemerkung: Wir beziehen jetzt die zweite Bedingung nicht ein, da,  wenn das der Fall wäre, würden die Drohnen weiß, die
-				// sich in der Z-Achse bewegen. Das hat dpch jetzt eine wichtige Folge: die "goalViolated" Flag wird in diesen Drohnen auf true
-				// bleiben. Darauf werden wird im nächsten Tel aufpassen müssen -> (Oder, wir lassen die "goalViolated" Variable automatisch auf
-				// false schalten, wenn "targetZActive" auf true ist) -> Nicht gemacht, um rigoros zu bleiben
-			{
-				(pListStart + i)->setGoalViolated(false);
-				(pListStart + i)->setColorWhite();
-			}
-		}
+		////"Violated Goals" detektieren und goalViolated Variable auf "true" setzen
+		//for (i = 0; i != ndRef; ++i)
+		//{
+		//	/*
+		//	Bei dieser Bedingung wir überprufen:
+		//	1. Der Abstand zwischen dieser Drohne und irgendanderen Drohne ist kleiner als erlaub
+		//	2. Diese Drohne befindet sich nicht dabei, ihr Z-Ziel zu erreichen
+		//	3. Die Drohne gehört zu diesem Gebiet
+		//	*/
+		//	if ((pListStart + i)->getID() && (pListStart + i)->getTargetZActive() == false && (pListStart + i)->getAreaTag() == aTag)
+		//	{
+		//		(pListStart + i)->setGoalViolated(true);
+		//		(pListStart + i)->setColorRed();
+		//	}
+		//	else if ((pListStart + i)->getID() == 0 && (pListStart + i)->getAreaTag() == aTag)
+		//		// Bemerkung: Wir beziehen jetzt die zweite Bedingung nicht ein, da,  wenn das der Fall wäre, würden die Drohnen weiß, die
+		//		// sich in der Z-Achse bewegen. Das hat dpch jetzt eine wichtige Folge: die "goalViolated" Flag wird in diesen Drohnen auf true
+		//		// bleiben. Darauf werden wird im nächsten Tel aufpassen müssen -> (Oder, wir lassen die "goalViolated" Variable automatisch auf
+		//		// false schalten, wenn "targetZActive" auf true ist) -> Nicht gemacht, um rigoros zu bleiben
+		//	{
+		//		(pListStart + i)->setGoalViolated(false);
+		//		(pListStart + i)->setColorWhite();
+		//	}
+		//}
 
 		// Bemerkung: Das was wir jetzt machen ist doof: Wir wussten schon welche Drohnen hatten ein Ziel verletzt
 		triggerPlan = false;
-		for (i = 0; i != ndRef; ++i)
+		/*for (i = 0; i != ndRef; ++i)
 		{
-			// Bei dieser Bedingung überprüfen wir noch mal dass die Drohne zu diesem Gebiet gehören
+			 Bei dieser Bedingung überprüfen wir noch mal dass die Drohne zu diesem Gebiet gehören
 			if ((pListStart + i)->getGoalViolated() && (pListStart + i)->getTargetZActive() == false && (pListStart + i)->getAreaTag() == aTag)
 			{
 				triggerPlan = true;
 			}
+		}*/
+		if (dronesHere > 1 & anyDroneMoves == false)
+		{
+			// Wir wollen jetzt checken, ob verschiedene Drohnen den gleichen Korridor belegen
+			for (i = 0; i != ndRef; ++i)
+			{
+				for (i = 0; i != ndRef - 1; ++i)
+					{
+						for (j = 1; j != ndRef; ++j)
+						{
+							// Wir überprüfen, dass sowohl die i-Drohne als auch die j-Drohne zu diesem Gebiet gehören
+							if (j > i && (pListStart + i)->getAreaTag() == aTag && (pListStart + j)->getAreaTag() == aTag)
+							{
+								// Bedingung zum gleichen Korridor
+								if ((pListStart + i)->getCurrCorr() == (pListStart + j)->getCurrCorr())
+								{
+									//std::cout << "Generelles Ziel verletzt" << std::endl;
+									// Generelles Ziel verletzt
+									triggerPlan = true;
+									(pListStart + i)->setGoalViolated(true);
+									(pListStart + i)->setColorRed();
+									(pListStart + j)->setGoalViolated(true);
+									(pListStart + j)->setColorRed();
+									// Damit haben wir das Paar Drohnen in Rot gefärbt und ihre GoalViolated-Variable auf "true" gesetzt
+									// Allerdings, wenn wir später den Drohnen-Anordnungs-Vorgang abschließen, setzen wir die GoalViolated-Variable
+									// und die Farbe wieder auf "false" bzw. "Weiß" nur an der Drohne, die sich bewegt hat.
+
+								}
+							}
+						}
+					}
+			}
+
 		}
+
 
 		/*
 		PLAN
@@ -175,8 +251,9 @@ void mape(vector<Drone> *pListOfDrones, int aTag)
 						std::cout << "Iterator for the search of free corridor " << j << std::endl;
 						if (*(corrVectStart + j) == 0 && freeCorrFlag == false)
 						{
+							anyDroneMoves = true;
 							// Jetzt nehmen wir eine Zuweisung der neuen Höhe für die leichteste Drohne vor
-							(pListStart + lightestDrone)->setZGoal(50 + j * corrHeight + corrHeight / 2);
+ 							(pListStart + lightestDrone)->setZGoal(50 + j * corrHeight + corrHeight / 2);
 							std::cout << "Drone " << lightestDrone << " to corr" << j << std::endl;
 							freeCorrFlag = true;
 							// Wir müssen jetzt sowohl corrVect (Vector of corridors) als auch die Zuweisung des Korridors zur Drohne aktualisieren
