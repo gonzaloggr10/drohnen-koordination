@@ -3,6 +3,12 @@
 
 // Prototyp der Funktion für die Abstandsberechnung
 float calcDist(vector<Drone>& listOfDrones, int droneI, int droneJ);
+// Funktion für die Suche von all den Drohnen in der Nähe der ausgewählten
+void findNearDrones(vector<Drone> &listOfDrones, int &nearDrone, int &nD, int &gw, bool *pPairFound);
+// Funktion für die Suche von all den "verwandten" Drohnen; d.h. Drohnen, die nicht nahe dem Gruppenleiter stehen aber ja von den aktuellen Mitgliedern
+void findRelativeDrones(vector<Drone> &listOfDrones, int &groupLeader, int &nearDrone, int &nD, int &gw, bool *pPairFound);
+
+
 
 // Definition des MAPE-Threads
 void mape(vector<Drone> *pListOfDrones)
@@ -11,10 +17,12 @@ void mape(vector<Drone> *pListOfDrones)
 	int i, j, n;
 	// Bemerkung: Diese Parametern werden hier zum zweiten Mal deklariert
 	int ndRef = 5;
-	int gwRef = 200;
+	int gwRef = 300;
 	//Deklaration des Vektor-Iterators
 	vector<Drone>::iterator it;
 	vector<Drone>::iterator pListStart = pListOfDrones->begin();
+	// Parametern für die Weiterentwicklung der Analyse
+	bool pairFound;
 	/*
 	Deklaration von Parametern für die Drohnenanordnungs-Methode
 	*********************************************************************
@@ -42,9 +50,37 @@ void mape(vector<Drone> *pListOfDrones)
 		*********************************************************************
 		*/
 
+		// Beim Start dieser Phase, löschen wir all die Gruppen
+		for (i = 0; i < ndRef; i++)
+		{
+			(pListStart + i)->eraseGroup();
+		}
+		// Weiterentwicklung des Monitorings
+		for (i = 0; i < ndRef; i++)
+		{
+			// Sucht & Hinzufügt nahe Drohnen
+			findNearDrones(*pListOfDrones, i, ndRef, gwRef, &pairFound);
+			if (pairFound == true)
+			// Wir suchen jetzt aktiv nach "verwandten" Gruppenmitglieder, d.h. Drohnen die nah von den aktuellen Mitgliedern stehen
+			for (j = 1; j < (pListStart + i)->getGroup().size(); j++)
+			{
+				findRelativeDrones(*pListOfDrones, i, (pListStart + i)->getGroup().at(j), ndRef, gwRef, &pairFound);
+				if (pairFound == true)
+				{
+					// Wenn diese Bedingung gestimmt hat, starten wir die Schleife neu
+					j = 1;
+				}
+			}
+		}
+
+		for (i = 0; i < ndRef; i++)
+		{
+			(pListStart + i)->printGroup();
+		}
+
 		// for-Schleife für die Durchfürung des Überprüfungsvorgang
 		// BEMERKUNG: Das ist eine andere Weg, eine Schleife zum Bearbeitung einer vector_Variable vorzunehmen aber nur mithilfe dem pListStart-Iterator. 
-		for (i = 0; i != ndRef - 1; ++i)
+	/*	for (i = 0; i != ndRef - 1; ++i)
 		{
 			for (j = 1; j != ndRef; ++j)
 			{
@@ -58,7 +94,8 @@ void mape(vector<Drone> *pListOfDrones)
 					}
 				}
 			}
-		}
+		}*/
+
 
 		/*
 		ANALYSIS
@@ -223,7 +260,7 @@ void mape(vector<Drone> *pListOfDrones)
 		}
 
 		// Wartedauer des MAPE-K Loops
-		Sleep(20);
+		Sleep(50);
 	}
 }
 
@@ -240,4 +277,41 @@ float calcDist(vector<Drone>& pListOfDrones, int droneI, int droneJ)
 	vect.y = (it + droneI)->getPosition().top - (it + droneJ)->getPosition().top;
 	dist = sqrt(vect.x * vect.x + vect.y * vect.y);
 	return dist;
+}
+
+
+void findNearDrones(vector<Drone> &listOfDrones, int &nearDrone, int &nD, int &gw, bool *pPairFound)
+{
+	vector<Drone>::iterator pListStart = listOfDrones.begin();
+	*pPairFound = false;
+	for (int n = 0; n < nD; n++)
+	{
+		// 1. Der Abstand wird überschritten 2. Die Drohne vergleichet sich nicht mit ihr selbst
+		if (calcDist(listOfDrones, nearDrone, n) < gw && n != nearDrone && (pListStart + nearDrone)->findDroneInGroup(n) == false)
+		{
+			std::cout << "Pair for " << nearDrone << "  found: " << n <<std::endl;
+			*pPairFound = true;
+			(pListStart + nearDrone)->addDroneToGroup(n);
+		}
+	}
+}
+
+void findRelativeDrones(vector<Drone> &listOfDrones, int &groupLeader, int &nearDrone, int &nD, int &gw, bool *pPairFound)
+{
+	vector<Drone>::iterator pListStart = listOfDrones.begin();
+	*pPairFound = false;
+	for (int n = 0; n < nD; n++)
+	{
+		// 1. Der Abstand wird überschritten 
+		//2. Die Drohne vergleichet sich nicht mit ihr selbst 
+		//3. Die gefundene Drohne steht nicht bereits in der Gruppe
+		// Hier liegt der erste Unterschied zwischen beiden Funktionen: die 3.Bedingung wird für der Gruppe des Gruppenleiters überprüft
+		if (calcDist(listOfDrones, nearDrone, n) < gw && n != nearDrone && (pListStart + groupLeader)->findDroneInGroup(n) == false)
+		{
+			std::cout << "Pair for " << nearDrone << "  found: " << n << std::endl;
+			*pPairFound = true;
+			// Hier liegt der zweite Unterschied zwischen beiden Funktionen: die Zuweisung wird jetzt der Gruppe des Gruppenleiters gemacht
+			(pListStart + groupLeader)->addDroneToGroup(n);
+		}
+	}
 }

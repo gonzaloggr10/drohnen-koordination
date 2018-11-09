@@ -13,8 +13,11 @@ Drone::Drone(float startX, float startY, float startZ, vector<Vector2f> tl, int 
 	flag = 1;
 	goalViolated = false;
 
+	// Wir integrieren die erste Drohne in ihre Gruppe
+	group.push_back(weight);
+
 	// Etablierung der Grenzwert
-	gw = 200;
+	gw = 300;
 
 	// Wir definieren die entsprechende Geschwindigkeiten dem ersten Ziel zufolge
 	xVelocity = calcVelocity(currTarget).x;
@@ -38,10 +41,19 @@ Drone::Drone(float startX, float startY, float startZ, vector<Vector2f> tl, int 
 	positionText.y -= 25;
 	font.loadFromFile("RockoFLF.ttf");
 	droneText.setFont(font);
-	droneText.setString("120");
+	//droneText.setString("120");
 	droneText.setCharacterSize(20);
 	droneText.setFillColor(sf::Color::Yellow);
-	droneText.setPosition(position);
+	//droneText.setPosition(positionText);
+
+	// Nötige Elemente für die Anzeige des Textes
+	// Damit den Text oben auf den Drohnen angezeigt wird, machen wir extra eine Variable dazu
+	positionWeight = position;
+	positionWeight.y += 25;
+	font.loadFromFile("RockoFLF.ttf");
+	droneWeight.setFont(font);
+	droneWeight.setCharacterSize(12);
+	droneWeight.setFillColor(sf::Color::Yellow);
 }
 FloatRect Drone::getPosition()
 {
@@ -58,6 +70,48 @@ CircleShape Drone::getDroneAura()
 Text Drone::getText()
 {
 	return droneText;
+}
+Text Drone::getDroneWeight()
+{
+	return droneWeight;
+}
+void Drone::addDroneToGroup(int droneCoef)
+{
+	std::cout << "Drone " << droneCoef << "added to group " << weight << std::endl;
+	group.push_back(droneCoef);
+}
+vector<int> Drone::getGroup()
+{
+	return group;
+}
+void Drone::printGroup()
+{
+	std::cout << "\nComponents of group " << weight << " are " ;
+	for (itG = group.begin();itG != group.end(); itG++)
+	{
+		std::cout << *itG << "\t";
+	}
+}
+void Drone::eraseGroup()
+{
+	// Darauf achten, dass die erste Komponente der Gruppenleiter ist und deswegen musst sie nicht gelöscht werden
+	group.erase(group.begin() + 1, group.end());
+	/*std::cout << "\nGroup after erase  for Drone " << weight << " is ";
+	for (itG = group.begin();itG != group.end(); itG++)
+	{
+		std::cout << *itG << "\t";
+	}*/
+}
+bool Drone::findDroneInGroup(int drone)
+{
+	for (itG = group.begin();itG != group.end(); itG++)
+	{
+		if (drone == *itG)
+		{
+			return true;
+		}
+	}
+	return false;
 }
 void Drone::setColorGreen()
 {
@@ -164,6 +218,9 @@ void Drone::update()
 	positionText = position;
 	positionText.y -= 25;
 
+	positionWeight = position;
+	positionWeight.y += 25;
+
 	positionAura = position;
 	positionAura.x -= gw;
 	positionAura.y -= gw;
@@ -222,4 +279,10 @@ void Drone::update()
 	// Aktualisiert den Text
 	heightString = to_string(int(z));
 	droneText.setString(heightString);
+	// Bewegt den Gewicht
+	droneWeight.setPosition(positionWeight);
+	// Aktualisiert den Gewicht
+	weightString = to_string(int(weight));
+	weightString = string("Drone ") + weightString;
+	droneWeight.setString(weightString);
 }

@@ -12,10 +12,13 @@ class Drone
 private:
 	Vector2f position;
 	Vector2f positionText;
+	Vector2f positionWeight;
 	Vector2f positionAura;
 	Vector2f currTarget;
 	vector<Vector2f> listOfTargets;
 	vector<Vector2f>::iterator itT;
+	vector<int> group;
+	vector<int>::iterator itG;
 	float zGoal;
 	float z; // Vorerst betrachten wir einen Bereich von 0 bis 100. Je nach die Größe dieses Bereich, normalisieren wir die Größe der Drohnen
 			 // ihrer Höhe entsprechend
@@ -33,6 +36,11 @@ private:
 	Font font;
 	// String-Variable für die Eingabe der Höhe ins Text-Objekt
 	string heightString;
+
+	// ZEICHNEN DES GEWICHTS
+	Text droneWeight;
+	// String-Variable für die Eingabe der Höhe ins Text-Objekt
+	string weightString;
 
 	float xVelocity;
 	float yVelocity;
@@ -54,7 +62,18 @@ public:
 
 	CircleShape getDroneAura();				
 
-	Text getText();							
+	Text getText();			
+
+	Text getDroneWeight();
+
+	// Diese Funktion ist einer setter-Funktion entsprechend
+	void addDroneToGroup(int);
+	vector<int> getGroup();					// setter Funktion für die Gruppe
+	void printGroup();
+	void eraseGroup();
+	// Funktion, die üperprüft, ob eine Drohne in einer Gruppe bereits ist
+	bool findDroneInGroup(int);
+
 
 	void setColorGreen();					// setter funktion. setzt eine farbe für die drohne (weiß)
 	void setColorWhite();					// setter Funktion. Setzt eine Farbe für die Drohne (Grün)
