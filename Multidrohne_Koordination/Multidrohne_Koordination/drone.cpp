@@ -17,7 +17,7 @@ Drone::Drone(float startX, float startY, float startZ, vector<Vector2f> tl, int 
 	group.push_back(weight);
 
 	// Etablierung der Grenzwert
-	gw = 300;
+	gw = 200;
 
 	// Wir definieren die entsprechende Geschwindigkeiten dem ersten Ziel zufolge
 	xVelocity = calcVelocity(currTarget).x;
@@ -77,7 +77,7 @@ Text Drone::getDroneWeight()
 }
 void Drone::addDroneToGroup(int droneCoef)
 {
-	std::cout << "Drone " << droneCoef << "added to group " << weight << std::endl;
+	//std::cout << "Drone " << droneCoef << "added to group " << weight << std::endl;
 	group.push_back(droneCoef);
 }
 vector<int> Drone::getGroup()

@@ -7,6 +7,8 @@ float calcDist(vector<Drone>& listOfDrones, int droneI, int droneJ);
 void findNearDrones(vector<Drone> &listOfDrones, int &nearDrone, int &nD, int &gw, bool *pPairFound);
 // Funktion für die Suche von all den "verwandten" Drohnen; d.h. Drohnen, die nicht nahe dem Gruppenleiter stehen aber ja von den aktuellen Mitgliedern
 void findRelativeDrones(vector<Drone> &listOfDrones, int &groupLeader, int &nearDrone, int &nD, int &gw, bool *pPairFound);
+// Diese Funktion hier überprüft, ob zwei Vektoren die gleichen Komponenten haben
+bool compareVectors(vector<int> &pa, vector<int> &pb);
 
 
 
@@ -17,12 +19,20 @@ void mape(vector<Drone> *pListOfDrones)
 	int i, j, n;
 	// Bemerkung: Diese Parametern werden hier zum zweiten Mal deklariert
 	int ndRef = 5;
-	int gwRef = 300;
+	int gwRef = 200;
 	//Deklaration des Vektor-Iterators
 	vector<Drone>::iterator it;
 	vector<Drone>::iterator pListStart = pListOfDrones->begin();
-	// Parametern für die Weiterentwicklung der Analyse
+	// Parametern für die Weiterentwicklung des Monitorings
 	bool pairFound;
+	vector<vector <int>> listOfFinalGroups;
+	vector<vector <int>>::iterator itFinal;
+	bool finalTrigger;
+	// Ich deklariere diese Variablen weil, sonst ergibt sich beim Aufrufen der compareVectors-Funktion
+	// folgender Fehler : C++ initial value of reference to non-const must be an lvalue
+	vector<int> a;
+	vector<int> b;
+	vector<int>::iterator itPrint;
 	/*
 	Deklaration von Parametern für die Drohnenanordnungs-Methode
 	*********************************************************************
@@ -55,6 +65,8 @@ void mape(vector<Drone> *pListOfDrones)
 		{
 			(pListStart + i)->eraseGroup();
 		}
+		// Wir löschen die endgültigen Gruppen auch
+		listOfFinalGroups.erase(listOfFinalGroups.begin(), listOfFinalGroups.end());
 		// Weiterentwicklung des Monitorings
 		for (i = 0; i < ndRef; i++)
 		{
@@ -73,11 +85,59 @@ void mape(vector<Drone> *pListOfDrones)
 			}
 		}
 
-		for (i = 0; i < ndRef; i++)
+		
+		// Wir führen jetzt eine Auswahl der endgültigen Gruppen durch
+		for (i = 0; i != ndRef - 1; ++i)
 		{
-			(pListStart + i)->printGroup();
+			for (j = 1; j != ndRef; ++j)
+			{
+				// Wir haben zuerst eine Auswahl aller möglichen Paaren Drohnen gemacht
+				if (j > i)
+				{
+					a = (pListStart + i)->getGroup();
+					b = (pListStart + j)->getGroup();
+					// 1: Zahl Komponenten gleich?
+					// 2: Befindet sich jede Komponente eines Vektors auch in dem anderen?
+					if ((pListStart + i)->getGroup().size() == (pListStart + j)->getGroup().size() && compareVectors(a, b))
+					{
+						// Jetzt überprüfen wir, dass diese endgultige Gruppe nicht bereits in der Liste von aktuellen, endgültigen Gruppen stand
+						finalTrigger = true;
+						for (itFinal = listOfFinalGroups.begin(); itFinal != listOfFinalGroups.end(); itFinal++)
+						{
+							if (compareVectors(a, *itFinal))
+							{
+								// Wenn wir detektieren, die Gruppe war schon da, stellen wir sofort den Trigger auf false
+								finalTrigger = false;
+							}
+						}
+						// Wenn der Trigger nach der Überprüfung noch auf true ist, bedeutet das, wir müssen die neue Gruppe hinzufügen
+						if (finalTrigger)
+						{
+							listOfFinalGroups.push_back(a);
+						}
+
+					}
+				}
+			}
 		}
 
+		/*for (i = 0; i < ndRef; i++)
+		{
+			(pListStart + i)->printGroup();
+		}*/
+
+		i = 0;
+		std::cout << "\nNumber of final groups:" << listOfFinalGroups.size() << std::endl;
+		for (itFinal = listOfFinalGroups.begin(); itFinal != listOfFinalGroups.end(); itFinal++)
+		{
+			
+			std::cout << "\nFinal group" << i << "\t";
+			for (itPrint = itFinal->begin(); itPrint != itFinal->end(); itPrint++)
+			{
+				std::cout << *itPrint << "\t";
+			}
+			i++;
+		}
 		// for-Schleife für die Durchfürung des Überprüfungsvorgang
 		// BEMERKUNG: Das ist eine andere Weg, eine Schleife zum Bearbeitung einer vector_Variable vorzunehmen aber nur mithilfe dem pListStart-Iterator. 
 	/*	for (i = 0; i != ndRef - 1; ++i)
@@ -289,7 +349,7 @@ void findNearDrones(vector<Drone> &listOfDrones, int &nearDrone, int &nD, int &g
 		// 1. Der Abstand wird überschritten 2. Die Drohne vergleichet sich nicht mit ihr selbst
 		if (calcDist(listOfDrones, nearDrone, n) < gw && n != nearDrone && (pListStart + nearDrone)->findDroneInGroup(n) == false)
 		{
-			std::cout << "Pair for " << nearDrone << "  found: " << n <<std::endl;
+			//std::cout << "Pair for " << nearDrone << "  found: " << n <<std::endl;
 			*pPairFound = true;
 			(pListStart + nearDrone)->addDroneToGroup(n);
 		}
@@ -308,10 +368,34 @@ void findRelativeDrones(vector<Drone> &listOfDrones, int &groupLeader, int &near
 		// Hier liegt der erste Unterschied zwischen beiden Funktionen: die 3.Bedingung wird für der Gruppe des Gruppenleiters überprüft
 		if (calcDist(listOfDrones, nearDrone, n) < gw && n != nearDrone && (pListStart + groupLeader)->findDroneInGroup(n) == false)
 		{
-			std::cout << "Pair for " << nearDrone << "  found: " << n << std::endl;
+			//std::cout << "Pair for " << nearDrone << "  found: " << n << std::endl;
 			*pPairFound = true;
 			// Hier liegt der zweite Unterschied zwischen beiden Funktionen: die Zuweisung wird jetzt der Gruppe des Gruppenleiters gemacht
 			(pListStart + groupLeader)->addDroneToGroup(n);
 		}
 	}
+}
+
+bool compareVectors(vector<int> &pa, vector<int> &pb)
+{
+	vector<int>::iterator ita;
+	vector<int>::iterator itb;
+	bool compFound;
+	for (ita = pa.begin(); ita != pa.end(); ita++)
+	{
+		compFound = false;
+		for (itb = pb.begin(); itb != pb.end(); itb++)
+		{
+			if (*ita == *itb)
+			{
+				compFound = true;
+				break;
+			}
+		}
+		if (compFound == false)
+		{
+			return false;
+		}
+	}
+	return true;
 }
