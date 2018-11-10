@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "mape.h"
+#include "finalGroup.h"
 
 // Prototyp der Funktion für die Abstandsberechnung
 float calcDist(vector<Drone>& listOfDrones, int droneI, int droneJ);
@@ -23,18 +24,25 @@ void mape(vector<Drone> *pListOfDrones)
 	//Deklaration des Vektor-Iterators
 	vector<Drone>::iterator it;
 	vector<Drone>::iterator pListStart = pListOfDrones->begin();
+
 	// Parametern für die Weiterentwicklung des Monitorings
 	bool pairFound;
-	vector<vector <int>> listOfFinalGroups;
-	vector<vector <int>>::iterator itFinal;
+	vector<vector<int>> listOfFinalGroups;
+	vector<vector<int>>::iterator itFinal;
+	// anyDronesMove: Variable, die es uns ermöglicht, auf das Aufhören der Bewegungen der Drohnen zu warten und nur dann die GoalViolated-Variablen wieder auf
+	// "false" zu setzen
+	// Anstatt eine neue Klasse "Final Group" gennant zu erstellen, haben wir entschieden Einfachheit halber, dass wir einen neuen Vektor mit den Informationen
+	// über die anyDroneMOves-Variable für jede Gruppe auf der Stelle kreieren
+	vector<bool> listOfAnyDroneMoves;
 	bool finalTrigger;
+	int itGroupTag;
 	// Ich deklariere diese Variablen weil, sonst ergibt sich beim Aufrufen der compareVectors-Funktion
 	// folgender Fehler : C++ initial value of reference to non-const must be an lvalue
 	vector<int> a;
 	vector<int> b;
 	vector<int>::iterator itPrint;
 	/*
-	Deklaration von Parametern für die Drohnenanordnungs-Methode
+	Detklaration von Parametern für die Drohnenanordnungs-Methode
 	*********************************************************************
 	*/
 	bool triggerPlan;
@@ -60,13 +68,17 @@ void mape(vector<Drone> *pListOfDrones)
 		*********************************************************************
 		*/
 
-		// Beim Start dieser Phase, löschen wir all die Gruppen
+		// Beim Start dieser Phase, löschen wir all die Gruppen und starten die Gehörigkeit zu einer Gruppe neu
 		for (i = 0; i < ndRef; i++)
 		{
 			(pListStart + i)->eraseGroup();
+			// Wir benutzen "j" nur aufgrund der Tatsache, dass die Funktion setGroupTag() ein Fehler sonst verursacht
+			j = (-1);
+			(pListStart + i)->setGroupTag(j);
 		}
-		// Wir löschen die endgültigen Gruppen auch
+		// Wir löschen die endgültigen Gruppen und ihre anyDroneMoves-Variablen auch
 		listOfFinalGroups.erase(listOfFinalGroups.begin(), listOfFinalGroups.end());
+		listOfAnyDroneMoves.erase(listOfAnyDroneMoves.begin(), listOfAnyDroneMoves.end());
 		// Weiterentwicklung des Monitorings
 		for (i = 0; i < ndRef; i++)
 		{
@@ -111,9 +123,11 @@ void mape(vector<Drone> *pListOfDrones)
 							}
 						}
 						// Wenn der Trigger nach der Überprüfung noch auf true ist, bedeutet das, wir müssen die neue Gruppe hinzufügen
+						// Wir fügen auch erstmal ein "false" als anyDroneMOves-Variable der Gruppe hinzu
 						if (finalTrigger)
 						{
 							listOfFinalGroups.push_back(a);
+							listOfAnyDroneMoves.push_back(false);
 						}
 
 					}
@@ -121,41 +135,58 @@ void mape(vector<Drone> *pListOfDrones)
 			}
 		}
 
+
 		/*for (i = 0; i < ndRef; i++)
 		{
 			(pListStart + i)->printGroup();
 		}*/
 
-		i = 0;
+		// Diese Funktion hilft nicht nur dabei, die Ausgabe auszudrücken, sondern auch die Zuweisung der Gruppe den Drohnen durchzuführen, zu der sie aktuell gehören
+		itGroupTag = 0;
 		std::cout << "\nNumber of final groups:" << listOfFinalGroups.size() << std::endl;
 		for (itFinal = listOfFinalGroups.begin(); itFinal != listOfFinalGroups.end(); itFinal++)
 		{
-			
-			std::cout << "\nFinal group" << i << "\t";
+
+			std::cout << "\nFinal group" << itGroupTag << "\t";
 			for (itPrint = itFinal->begin(); itPrint != itFinal->end(); itPrint++)
 			{
+				// Für jede Komponente der Gruppe bzw. Drohne, weisen wir ihr das Tag der Gruppe, um der jeweils die Schleife gemacht wird 
+				(pListStart + *itPrint)->setGroupTag(itGroupTag);
 				std::cout << *itPrint << "\t";
 			}
-			i++;
+			itGroupTag++;
 		}
-		// for-Schleife für die Durchfürung des Überprüfungsvorgang
-		// BEMERKUNG: Das ist eine andere Weg, eine Schleife zum Bearbeitung einer vector_Variable vorzunehmen aber nur mithilfe dem pListStart-Iterator. 
-	/*	for (i = 0; i != ndRef - 1; ++i)
-		{
-			for (j = 1; j != ndRef; ++j)
-			{
-				if (j > i)
-				{
-					if (calcDist(*pListOfDrones, i, j) < gwRef)
-					{
-						(pListStart + i)->setID((pListStart + i)->getID() + 1);
-						(pListStart + j)->setID((pListStart + j)->getID() + 1);
 
+		// Vorgang für die Behandlung von der anyDroneMoves-Variable
+		itGroupTag = 0;
+		for (itFinal = listOfFinalGroups.begin(); itFinal != listOfFinalGroups.end(); itFinal++)
+		{
+			// for-Schleife, die prüft, ob sich irgendeine Drohne in der Gruppe noch bewegt bzw. ein Z-Ziel hat
+			for (i = 0; i != ndRef; ++i)
+			{
+				// Diese Bedingung besagt, wenn erst nur eine Drohne ihre Varialbe Execute auf "true" hat, setzen wir anyDroneMoves auf "true".
+				if ((pListStart + i)->getExecuteActive() && (pListStart + i)->getGroupTag() == itGroupTag)
+				{
+					listOfAnyDroneMoves.at(itGroupTag) = true;
+				}
+
+			}
+			// Wenn hier anyDroneMoves auf "false" ist, bedeutet das, dass entweder haben all die Drohnen ihre Ziele erreicht oder die schon OK waren
+			if (listOfAnyDroneMoves.at(itGroupTag) == false)
+			{
+				for (i = 0; i != ndRef; ++i)
+				{
+					if ((pListStart + i)->getGroupTag() == itGroupTag)
+					{
+						//std::cout << "Wieder auf weiss" << std::endl;
+						(pListStart + i)->setGoalViolated(false);
+						(pListStart + i)->setColorWhite();
 					}
 				}
 			}
-		}*/
-
+			itGroupTag++;
+		}
+		
 
 		/*
 		ANALYSIS
@@ -163,131 +194,142 @@ void mape(vector<Drone> *pListOfDrones)
 		*********************************************************************
 		*********************************************************************
 		*/
-
-		//"Violated Goals" detektieren und goalViolated Variable auf "true" setzen
-		for (i = 0; i != ndRef; ++i)
-		{
-			/*
-			Bei dieser Bedingung wir überprufen: 
-			1. Der Abstand zwischen dieser Drohne und irgendanderen Drohne ist kleiner als erlaub
-			2. Diese Drohne befindet sich nicht dabei, ihr Z-Ziel zu erreichen
-			*/
-			if ((pListStart + i)->getID() && (pListStart + i)->getTargetZActive() == false)
-			{
-				(pListStart + i)->setGoalViolated(true);
-				(pListStart + i)->setColorGreen();
-			}
-			else if ((pListStart + i)->getID() == 0)
-			// Bemerkung: Wir beziehen jetzt die zweite Bedingung nicht ein, da,  wenn das der Fall wäre, würden die Drohnen weiß, die
-			// sich in der Z-Achse bewegen. Das hat dpch jetzt eine wichtige Folge: die "goalViolated" Flag wird in diesen Drohnen auf true
-			// bleiben. Darauf werden wird im nächsten Tel aufpassen müssen -> (Oder, wir lassen die "goalViolated" Variable automatisch auf
-			// false schalten, wenn "targetZActive" auf true ist) -> Nicht gemacht, um rigoros zu bleiben
-			{
-				(pListStart + i)->setGoalViolated(false);
-				(pListStart + i)->setColorWhite();
-			}
-		}
-
-		// Bemerkung: Das was wir jetzt machen ist doof: Wir wussten schon welche Drohnen hatten ein Ziel verletzt
-		triggerPlan = false;
-		for (i = 0; i != ndRef; ++i)
-		{
-			if ((pListStart + i)->getGoalViolated() && (pListStart + i)->getTargetZActive() == false)
-			{
-				triggerPlan = true;
-			}
-		}
-
-			/*
-			PLAN
-			*********************************************************************
-			*********************************************************************
-			*********************************************************************
-			*/
-
-		// for-Schleife zum Zurücksetzen zu 0 des "corridor vector"s
-		// Optimieren: Rauskriegen, wie man mit der vector-Klasse den Komponenten direkt Werte zuweist.
-
-		if (triggerPlan)
-		{
-			for (i = 0; i < nc; i++)
-			{
-				*(corrVectStart + i) = 0;
-			}
-
-			// Aufbau von corrVect (Vector of corridors) und Zuweisung des aktuellen Korridors zu jeder Drohne (in der Klasse)
-			for (it = pListOfDrones->begin(); it != pListOfDrones->end(); it++)
-			{
-				if (it->getGoalViolated() && it->getTargetZActive() == false)
-				{
-					for (i = 0; i < nc; i++)
-					{
-						// Bedingung der Zugehörigkeit zu Flugkorridor
-						if (50 + i * corrHeight <= it->getZ() && it->getZ() < 50 + (i + 1) * corrHeight)
-						{
-							it->setCurrCorr(i);
-							*(corrVectStart + i) = *(corrVectStart + i) + 1;
-						}
-					}
-				}
-			}
-			// Drohnenanordnung-Methode
-			// Bemerkung: Die Schleif geht von Oben nach Unten
-			std::cout << "\n" << std::endl;
 		
-			for (i = nc - 1; i >= 0; i--)
+		
+		//
+		//// Bemerkung: Das was wir jetzt machen ist doof: Wir wussten schon welche Drohnen hatten ein Ziel verletzt
+		triggerPlan = false;
+		
+		// Diese variable ist dem Iterator itFinal entsprechend aber von Typ int. Wir inkrementieren im gleichen Tempo
+		itGroupTag = 0;
+		for (itFinal = listOfFinalGroups.begin(); itFinal != listOfFinalGroups.end(); itFinal++)
+		{
+			if (listOfAnyDroneMoves.at(itGroupTag) == false)
 			{
-				std::cout << "Corridor " << i << " : " << *(corrVectStart + i) << std::endl;
-				if (*(corrVectStart + i) > 1) // -> Das heißt, Korridor überbelegt
+				// Wir wollen jetzt checken, ob verschiedene Drohnen den gleichen Korridor belegen
+				for (i = 0; i != ndRef - 1; ++i)
 				{
-					freeCorrFlag = false;	
-					// Hier geben wir einen großen Wert ein (damit jeder andere Gewicht kleiner sein kann)
-					minWeight = 10;
-					// Leichteste Drohne im Korridor finden
-					for (n = 0; n != ndRef; n++)
+					for (j = 1; j != ndRef; ++j)
 					{
-						// Wir prüfen, ob diese Drohne im aktuellen Korridor liegt und gleichzeitig, ob diese die leichteste da ist
-						if ((pListStart + n)->getCurrCorr() == i && (pListStart + n)->getWeight() < minWeight && (pListStart + n)->getGoalViolated())
+						// Wir überprüfen, dass sowohl die i-Drohne als auch die j-Drohne zu dieser Gruppe gehören
+						if (j > i && (pListStart + i)->getGroupTag() == itGroupTag && (pListStart + j)->getGroupTag() == itGroupTag)
 						{
-							std::cout << (pListStart + n)->getWeight() << " less than " << minWeight << std::endl;
-							minWeight = (pListStart + n)->getWeight();
-							lightestDrone = n;
-							std::cout << "Lightest Drone found: " << n << std::endl;
+							// Bedingung zum gleichen Korridor
+							if ((pListStart + i)->getCurrCorr() == (pListStart + j)->getCurrCorr())
+							{
+								//std::cout << "Generelles Ziel verletzt" << std::endl;
+								// Generelles Ziel verletzt
+								triggerPlan = true;
+								(pListStart + i)->setGoalViolated(true);
+								(pListStart + i)->setColorBlue();
+								(pListStart + j)->setGoalViolated(true);
+								(pListStart + j)->setColorBlue();
+								// Damit haben wir das Paar Drohnen in Blau gefärbt und ihre GoalViolated-Variable auf "true" gesetzt
+
+							}
 						}
-					}
-					// "Rundschleife mit Umkehrung" zu dem Zweck, die Belegung aller Korridore zu überprufen und den Zielkorridor zuzuweisen
-					// Erklärung dazu auf den Notizen
-					for (n = (nc - 1) - ((i + nc - 1) % nc); n != (nc - 1) - i; n = (n + 1) % nc)
-					{
-						// Diese ist die Iterationsvariable, die wir schließlich benutzten (zu beachten ist, dabei wird eine zweite Umkehrung gemacht)
-						// So, j ist mein Zielkorridor
-						j = (nc - 1) - n;
-						std::cout << "Iterator for the search of free corridor " << j << std::endl;
-						if (*(corrVectStart + j) == 0 && freeCorrFlag == false)
-						{
-							// Jetzt nehmen wir eine Zuweisung der neuen Höhe für die leichteste Drohne vor
-							(pListStart + lightestDrone)->setZGoal(50 + j * corrHeight + corrHeight / 2);
-							std::cout << "Drone " << lightestDrone << " to corr" << j << std::endl;
-							freeCorrFlag = true;
-							// Wir müssen jetzt sowohl corrVect (Vector of corridors) als auch die Zuweisung des Korridors zur Drohne aktualisieren
-							*(corrVectStart + i) = *(corrVectStart + i) - 1;
-							*(corrVectStart + j) = *(corrVectStart + j) + 1;
-							(pListStart + lightestDrone)->setCurrCorr(j);
-						}
-					}
-					// Wir prüfen jetzt über, ob wir tatsächlich einen freien Korridor gefunden haben.
-					if (freeCorrFlag == false)
-					{
-						std::cout << "Inminent Collision! All corridors are full" << std::endl;
-					}
-					// Jetzt, für den Fall, dass mehr als 2 Drohnen im Korridor lagen, überprüfen wir wieder ob wir das Verfahren wiederholen müssen
-					if (*(corrVectStart + i) > 1)
-					{
-						std::cout << "Still " << *(corrVectStart + i) << " drones in corridor " << i << std::endl;
-						i++;
 					}
 				}
 			}
+			itGroupTag++;
+		}
+
+		/*
+		PLAN
+		*********************************************************************
+		*********************************************************************
+		*********************************************************************
+		*/
+
+		itGroupTag = 0;
+		for (itFinal = listOfFinalGroups.begin(); itFinal != listOfFinalGroups.end(); itFinal++)
+		{
+			if (triggerPlan)
+			{
+				// all die Komponenten von corrVect auf 0 setzen
+				for (i = 0; i < nc; i++)
+				{
+					*(corrVectStart + i) = 0;
+				}
+
+				// Aufbau von corrVect (Vector of corridors) und Zuweisung des aktuellen Korridors zu jeder Drohne (in der Klasse)
+				for (it = pListOfDrones->begin(); it != pListOfDrones->end(); it++)
+				{
+					// Bei dieser Bedingung überprüfen wir noch mal dass die Drohne zu diesem Gebiet gehören
+					if (it->getGoalViolated() && it->getTargetZActive() == false && it->getGroupTag() == itGroupTag)
+					{
+						for (i = 0; i < nc; i++)
+						{
+							// Bedingung der Zugehörigkeit zu Flugkorridor
+							if (50 + i * corrHeight <= it->getZ() && it->getZ() < 50 + (i + 1) * corrHeight)
+							{
+								it->setCurrCorr(i);
+								*(corrVectStart + i) = *(corrVectStart + i) + 1;
+							}
+						}
+					}
+				}
+				// Drohnenanordnung-Methode
+				// Bemerkung: Die Schleif geht von Oben nach Unten
+				//std::cout << "\n" << std::endl;
+
+				for (i = nc - 1; i >= 0; i--)
+				{
+					//std::cout << "Corridor " << i << " : " << *(corrVectStart + i) << std::endl;
+					if (*(corrVectStart + i) > 1) // -> Das heißt, Korridor überbelegt
+					{
+						freeCorrFlag = false;
+						// Hier geben wir einen großen Wert ein (damit jeder andere Gewicht kleiner sein kann)
+						minWeight = 10;
+						// Leichteste Drohne im Korridor finden
+						for (n = 0; n != ndRef; n++)
+						{
+							// Wir prüfen, ob diese Drohne im aktuellen Korridor liegt und gleichzeitig, ob diese die leichteste da ist
+							// Bei dieser Bedingung überprüfen wir noch mal dass die Drohne zu diesem Gebiet gehören
+							if ((pListStart + n)->getCurrCorr() == i && (pListStart + n)->getWeight() < minWeight && (pListStart + n)->getGoalViolated() && (pListStart + n)->getGroupTag() == itGroupTag)
+							{
+								std::cout << (pListStart + n)->getWeight() << " less than " << minWeight << std::endl;
+								minWeight = (pListStart + n)->getWeight();
+								lightestDrone = n;
+								std::cout << "Lightest Drone found: " << n << std::endl;
+							}
+						}
+						// "Rundschleife mit Umkehrung" zu dem Zweck, die Belegung aller Korridore zu überprufen und den Zielkorridor zuzuweisen
+						// Erklärung dazu auf den Notizen
+						for (n = (nc - 1) - ((i + nc - 1) % nc); n != (nc - 1) - i; n = (n + 1) % nc)
+						{
+							// Diese ist die Iterationsvariable, die wir schließlich benutzten (zu beachten ist, dabei wird eine zweite Umkehrung gemacht)
+							// So, j ist mein Zielkorridor
+							j = (nc - 1) - n;
+							std::cout << "Iterator for the search of free corridor " << j << std::endl;
+							if (*(corrVectStart + j) == 0 && freeCorrFlag == false)
+							{
+								listOfAnyDroneMoves.at(itGroupTag) == true;
+								// Jetzt nehmen wir eine Zuweisung der neuen Höhe für die leichteste Drohne vor
+								(pListStart + lightestDrone)->setZGoal(50 + j * corrHeight + corrHeight / 2);
+								std::cout << "Drone " << lightestDrone << " to corr" << j << std::endl;
+								freeCorrFlag = true;
+								// Wir müssen jetzt sowohl corrVect (Vector of corridors) als auch die Zuweisung des Korridors zur Drohne aktualisieren
+								*(corrVectStart + i) = *(corrVectStart + i) - 1;
+								*(corrVectStart + j) = *(corrVectStart + j) + 1;
+								(pListStart + lightestDrone)->setCurrCorr(j);
+							}
+						}
+						// Wir prüfen jetzt über, ob wir tatsächlich einen freien Korridor gefunden haben.
+						if (freeCorrFlag == false)
+						{
+							std::cout << "Inminent Collision! All corridors are full" << std::endl;
+						}
+						// Jetzt, für den Fall, dass mehr als 2 Drohnen im Korridor lagen, überprüfen wir wieder ob wir das Verfahren wiederholen müssen
+						if (*(corrVectStart + i) > 1)
+						{
+							std::cout << "Still " << *(corrVectStart + i) << " drones in corridor " << i << std::endl;
+							i++;
+						}
+					}
+				}
+			}
+			itGroupTag++;
 		}
 		
 		/*
@@ -296,6 +338,7 @@ void mape(vector<Drone> *pListOfDrones)
 		*********************************************************************
 		*********************************************************************
 		*/
+		
 		// Hier geht's um einen zum Teil redundanten Schritt, der ermöglicht uns jedoch, die Planning & Exectution Phasen zu trennen
 		for (i = 0; i != ndRef; ++i)
 		{
@@ -310,13 +353,13 @@ void mape(vector<Drone> *pListOfDrones)
 		/*std::cout << "\n\n" << std::endl;
 		for (i = 0; i < nc; i++)
 		{
-			std::cout << *(corrVectStart + i) << std::endl;
+		std::cout << *(corrVectStart + i) << std::endl;
 		}
-*/
+		*/
 		//Identifikatoren zu 0 zurücksetzen
 		for (i = 0; i != ndRef; ++i)
 		{
-			(pListStart+i)->setID(0);
+			(pListStart + i)->setID(0);
 		}
 
 		// Wartedauer des MAPE-K Loops

@@ -102,6 +102,15 @@ void Drone::eraseGroup()
 		std::cout << *itG << "\t";
 	}*/
 }
+void Drone::setGroupTag(int & gTag)
+{
+	// Wenn die Drohne zu keiner Gruppe gehört, weisen wir ihr die Zahl -1 zu
+	groupTag = gTag;
+}
+int Drone::getGroupTag()
+{
+	return groupTag;
+}
 bool Drone::findDroneInGroup(int drone)
 {
 	for (itG = group.begin();itG != group.end(); itG++)
@@ -113,9 +122,9 @@ bool Drone::findDroneInGroup(int drone)
 	}
 	return false;
 }
-void Drone::setColorGreen()
+void Drone::setColorBlue()
 {
-	droneShape.setFillColor(Color(Color::Green));
+	droneShape.setFillColor(Color(Color::Blue));
 }
 void Drone::setColorWhite()
 {

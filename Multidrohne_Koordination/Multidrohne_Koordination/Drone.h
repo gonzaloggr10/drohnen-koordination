@@ -26,6 +26,7 @@ private:
 	bool targetZActive;
 	bool executeActive;
 	bool flag;
+	int groupTag;
 
 	// Ein Objekt "droneShape" gennant der Klasse "RectangleShape" 
 	RectangleShape droneShape;
@@ -71,11 +72,14 @@ public:
 	vector<int> getGroup();					// setter Funktion für die Gruppe
 	void printGroup();
 	void eraseGroup();
+
+	void setGroupTag(int &gTag);
+	int getGroupTag();
 	// Funktion, die üperprüft, ob eine Drohne in einer Gruppe bereits ist
 	bool findDroneInGroup(int);
 
 
-	void setColorGreen();					// setter funktion. setzt eine farbe für die drohne (weiß)
+	void setColorBlue();					// setter funktion. setzt eine farbe für die drohne (weiß)
 	void setColorWhite();					// setter Funktion. Setzt eine Farbe für die Drohne (Grün)
 
 	float getZ();							// getter Funktion für die Flughöhe
