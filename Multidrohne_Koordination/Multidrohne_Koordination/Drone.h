@@ -28,8 +28,7 @@ private:
 	bool flag;
 	int groupTag;
 
-	// Ein Objekt "droneShape" gennant der Klasse "RectangleShape" 
-	RectangleShape droneShape;
+	CircleShape droneShape;
 	Text droneText;
 	// Definition eines CircleShape-Objekts für die Darstellung der Auren
 	CircleShape droneAura;
@@ -59,7 +58,7 @@ public:
 	
 	FloatRect getPosition();				// getter Funktion. Erhaltet die Position des Rechteckes vom droneShape Objekt
 
-	RectangleShape getShape();				// getter Funktion. Erhaltet die Variable droneShape vom Typ RectangleShape
+	CircleShape getShape();
 
 	CircleShape getDroneAura();				
 

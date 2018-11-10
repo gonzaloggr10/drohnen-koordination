@@ -23,8 +23,7 @@ Drone::Drone(float startX, float startY, float startZ, vector<Vector2f> tl, int 
 	xVelocity = calcVelocity(currTarget).x;
 	yVelocity = calcVelocity(currTarget).y;
 
-	// Mit den Eingabedaten definieren wir den "RectangleShape" Objekt an der Stelle
-	droneShape.setSize(Vector2f(90 * z / 100, 90 * z / 100)); // 90 ist die maximale Größe und 100 ist die Normalisierungskoeffizient
+	droneShape.setRadius(25 * z / 100); // 25 ist die maximale Größe und 100 ist die Normalisierungskoeffizient
 	droneShape.setPosition(position);
 	// Wir angeben manche Einstellungen für die Darstellung der Auren
 	positionAura = position;
@@ -59,7 +58,7 @@ FloatRect Drone::getPosition()
 {
 	return droneShape.getGlobalBounds();
 }
-RectangleShape Drone::getShape()
+CircleShape Drone::getShape()
 {
 	return droneShape;
 }
@@ -280,7 +279,9 @@ void Drone::update()
 
 	// Bewegt die Drohne
 	droneShape.setPosition(position);
-	droneShape.setSize(Vector2f(25 * z / 100, 25 * z / 100)); // 25 ist die maximale Größe und 100 ist die Normalisierungskoeffizient
+	// Aktualisiert die neue Größe der Drohne je nach der Höhe Z
+	//droneShape.setSize(Vector2f(25 * z / 100, 25 * z / 100)); // 25 ist die maximale Größe und 100 ist die Normalisierungskoeffizient
+	droneShape.setRadius(25 * z / 100); // 25 ist die maximale Größe und 100 ist die Normalisierungskoeffizient
 	// Bewegt die Aura
 	droneAura.setPosition(positionAura);
 	// Bewegt den Text
