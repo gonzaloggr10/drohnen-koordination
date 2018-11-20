@@ -14,8 +14,10 @@
 \contentsline {section}{\numberline {3}Kollisionsvermeidung: Zentraler Ansatz}{6}{section.3}
 \contentsline {subsection}{\numberline {3.1}Gruppenerkennung}{7}{subsection.3.1}
 \contentsline {subsubsection}{\numberline {3.1.1}Grundlagen}{7}{subsubsection.3.1.1}
-\contentsline {section}{\numberline {4}Kollisionsvermeidung: Dezentraler Ansatz}{8}{section.4}
-\contentsline {section}{\numberline {5}Evaluierung}{8}{section.5}
-\contentsline {section}{\numberline {6}Zuk\IeC {\"u}nftige Arbeit}{8}{section.6}
-\contentsline {section}{\numberline {7}Fazit}{8}{section.7}
-\contentsline {section}{Literaturverzeichnis}{9}{section*.13}
+\contentsline {subsubsection}{\numberline {3.1.2}Methode}{8}{subsubsection.3.1.2}
+\contentsline {subsection}{\numberline {3.2}Zentrales MAPE-K}{10}{subsection.3.2}
+\contentsline {section}{\numberline {4}Kollisionsvermeidung: Dezentraler Ansatz}{11}{section.4}
+\contentsline {section}{\numberline {5}Evaluierung}{11}{section.5}
+\contentsline {section}{\numberline {6}Zuk\IeC {\"u}nftige Arbeit}{11}{section.6}
+\contentsline {section}{\numberline {7}Fazit}{11}{section.7}
+\contentsline {section}{Literaturverzeichnis}{13}{section*.18}

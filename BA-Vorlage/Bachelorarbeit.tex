@@ -202,7 +202,7 @@ benutzen wir Dezentralisierungsvorlagen in [1] präsentiert. Schließlich nehmen
 
  
 Darüber hinaus realisieren wir eine Implementation der zentralen und dezentralen Systemen für die Anwendung zur “Multi-Drohnen Kollisionsvermeidung” , 
-wobei c++ Programmiersprache benutzt wird und SystemC Kanäle für die Kommunikation verantwortlich sind. Als ein wünschenswertes Ziel, implementieren wir 
+wobei C++ Programmiersprache benutzt wird und SystemC Kanäle für die Kommunikation verantwortlich sind. Als ein wünschenswertes Ziel, implementieren wir 
 auch die Anwendung zur “Multi-Drohnen Paket Optimierung”. Falls es die Zeit nicht erlaubt, erklären wir die Vorgehensweise, wie man das implementieren 
 könnte.
 
@@ -214,19 +214,17 @@ könnte.
 \section{Drohnenanordnungsmethode}
 \label{sec:drohnenanordnungs}
 Zuallererst stellen wir unsere Drohnenanordnungsmethode vor. Es handelt sich um eine Methode, deren Aufgabe es ist, einen Plan zur Anpassung der Flughöhe 
-der Drohnen durchzuführen und dabei enge Flugbähne und ggf. Kollisionen zu vermeiden. Im Gegensatz zur Annäherung zweier Luftfahrzeuge mit 
+der Drohnen durchzuführen und dabei enge Flugbahnen und ggf. Kollisionen zu vermeiden. Im Gegensatz zur Annäherung zweier Luftfahrzeuge mit 
 Kollisionsgefahr, wobei meistens Ausweichregeln zwischen Luftfahrzeugen zum Tragen kommen, stellt unsere Drohnenanordnungsmethode eine vorbeugende Maßnahme   
 dar, die den Luftraum aufteilt. 
 
-Beispiele von Ausweichmanöver\footnote{https://de.wikipedia.org} bei Kollisionsgefahr können wir in den Abbiludungen 
+Beispiele von Ausweichmanövern\footnote{https://de.wikipedia.org} bei Kollisionsgefahr können wir in den Abbiludungen 
 \ref{fig:encounter}, \ref{fig:cross} und \ref{fig:overtaking} sehen. Eine Annäherung mit Kollisionsgefahr ist tatsächlich eine Situation, die für 
-Verkehrsflugzeuge extrem selten stattfindet, denn dafür werden TCAS's (Traffic Alert and Collision Avoidance System) benutzt, die spezifische
-"`Schutzzonen"' um die eigenen Flugzeuge definiert und dazu beiträgt, zu nahe beieinander liegende Flugbahnen und damit das Risiko einer Annäherung mit 
+Verkehrsflugzeuge extrem selten stattfindet. Um dies zu verhindern, werden TCAS's (Traffic Alert and Collision Avoidance System) benutzt, die spezifische
+"`Schutzzonen"' für die eigenen Flugzeuge definieren und dazu beitragen, zu nahe beieinander liegende Flugbahnen und damit das Risiko einer Annäherung mit 
 Kollisionsgefahr zu vermeiden.
 
-Die Drohnenanordnungsmethode wird innerhalb einer Gruppe von Drohnen aufgerufen und ausgeführt, die zu nahe beieinander liegen. Späterhin bei den 	
-Abschnitten \ref{sec:zentral} und \ref{sec:dezentral} betrachten wir zwei verschiedene Wege, durch die wir Gruppen von Drohnen bilden, die einander nahe 
-stehen. Im Moment erklären wir jedoch, wie die Methode innerhalb eine Gruppe funktioniert.
+Die Drohnenanordnungsmethode wird innerhalb einer Gruppe von Drohnen aufgerufen und ausgeführt, die zu nahe beieinander in der XY-Ebene liegen. Späterhin bei den Abschnitten \ref{sec:zentral} und \ref{sec:dezentral} betrachten wir zwei verschiedene Wege, durch die wir Gruppen von Drohnen bilden, die einander nahe stehen. Im Moment erklären wir jedoch nur, wie die Methode innerhalb einer Gruppe funktioniert.
 
 
 \begin{figure}
@@ -254,9 +252,9 @@ stehen. Im Moment erklären wir jedoch, wie die Methode innerhalb eine Gruppe fu
 
 \subsection{Funktionssweise}
 \label{subsec:funktionssweise}
-Nun erklären wir die Funktionsweise unserer Methode. Eine Schleife durchläuft alle Korridore von oben nach unten. Bei jedem Korridor überprüfen wir zunächst, ob dieser überbelegt ist bzw. er hat mehr als eine Drohne. Um das zu bestimmen, steht es uns bei der Planning-Phase zur Verfügung, einen Vorgang zur Erkennung des Korridors, in dem jede Drohne zu diesem Zeitpunkt fliegt. Eine vollständige Erklärung zur Methode finden wir im Abbildung \ref{fig:drohnenanordnung}.
+Nun erklären wir die Funktionsweise unserer Methode. Eine Schleife durchläuft alle Korridore von oben nach unten. Bei jedem Korridor überprüfen wir zunächst, ob dieser überbelegt ist bzw., ob er mehr als eine Drohne hat. Soll es voll sein, so sollen wir nach einem freien Flugkorridor für die Drohne mit dem leichtesten Paket suchen. Eine vollständige Erklärung zur Methode finden wir in Abbildung \ref{fig:drohnenanordnung}.
 
-Wenn es mehr als eine Drohne in einem Flugkorridor gibt, müssen die überschüssige Drohnen also in andere Korridore fliegen, bis die Überbelegung gelöst ist. Um zu entscheiden, welche Drohne den Korridor an der ersten Stelle verlassen soll, verwenden wir ein Gewichtskriterium. Dieses lautet wie folgt: "`Die leichteste Drohne im überbelegtem Korridor muss sich an der ersten Stelle bewegen"'. Da die Drohnen einen Lieferservice ausmachen, trägt jede ein unterschiedliches Gewicht. Die Verwendung des Gewichts als Kriterium bietet uns eine hohe Zeit- und Energieeffizienz, denn eine leichtere Drohne erreicht ihr neues Flugziel schneller, wobei sie auch weniger Energie verbraucht.
+Wenn es mehr als eine Drohne in einem Flugkorridor gibt, müssen die überschüssigen Drohnen in andere Korridore fliegen, bis die Überbelegung gelöst ist. Um zu entscheiden, welche Drohne den Korridor zuerst verlassen soll, verwenden wir ein Gewichtskriterium. Dieses lautet wie folgt: "`Die leichteste Drohne im überbelegtem Korridor muss sich an der ersten Stelle bewegen"'. Da die Drohnen einen Lieferservice ausmachen, trägt jede ein unterschiedliches Gewicht. Die Verwendung des Gewichts als Kriterium bietet uns eine hohe Zeit- und Energieeffizienz, denn eine leichtere Drohne erreicht ihr neues Flugziel schneller, wobei sie auch weniger Energie verbraucht.
 
 Zur Veranschaulichung unserer Methode verwenden wir ein Beispiel. In der Abbildung \ref{fig:drohnenanordnungs_beispiel} sehen wir, wie die Methode Schritt für Schritt funktioniert.
 
@@ -286,23 +284,22 @@ Im Folgenden stellen wir eine erste Annäherung an die Dimensionen dieser Flugko
 \label{fig:drohnenanordnungs_beispiel}
 \end{figure}
 
+
 %Kurze Zusammenfassung dessen, worüber wir in diesem Abschnitt gesprochen haben
-In diesem Abschnitt haben wir sowohl die Flugkorridore als auch unsere Dronenanordnungsmethode vorgestellt. Als nächstes sprechen wir über den ersten Ansatz bei der Adaptierungsplanung: der zentraler Ansatz.
+In diesem Abschnitt haben wir sowohl die Flugkorridore als auch unsere Dronenanordnungsmethode vorgestellt. Als nächstes sprechen wir über den ersten Ansatz bei der Adaptierungsplanung: der zentrale Ansatz.
 
 \section{Kollisionsvermeidung: Zentraler Ansatz}
 \label{sec:zentral}
 
-Wie in Abschnitt \ref{subsec:hintergrund} erklärt, ein prominenter Ansatz zum Organisieren einer Regelschleife in selbstadaptiven Systemen besteht aus vier Komponenten, die für die Hauptfunktionen der Selbstanpassung verantwortlich sind: Überwachen, Analysieren, Planen und Ausführen, häufig als MAPE-Schleife bezeichnet \cite{Prager1961}. Bei einem zentralen Ansatz verwenden wir ausschließich eine MAPE-K Schleife für die Koordination unseres ganzen System. Das heißt, all die verschiedenen Gruppen von Drohnen, in denen eine Drohnenanordnungsmethode (siehe Abschnitt \ref{sec:drohnenanordnungs}) abgerufen wird, müssen von einer einzigen, allgemeinen Schleife geregelt werden. Der erste Schritt zu diesem Zweck ist die Festlegung, nach welchem Kriterien wir lokale Gruppe von Drohnen definieren, wo Drohnen zu nahe voneinander stehen.
+Wie in Abschnitt \ref{subsec:hintergrund} erklärt, besteht ein prominenter Ansatz zum Organisieren einer Regelschleife in selbstadaptiven Systemen aus vier Komponenten, die für die Hauptfunktionen der Selbstanpassung verantwortlich sind. Diese sind Überwachen, Analysieren, Planen und Ausführen, häufig als MAPE-Schleife bezeichnet \cite{Prager1961}. Bei einem zentralen Ansatz verwenden wir ausschließlich eine MAPE-K Schleife für die Koordination unseres ganzen Systems. Das heißt, all die verschiedenen Gruppen von Drohnen, in denen eine Drohnenanordnungsmethode (siehe Abschnitt \ref{sec:drohnenanordnungs}) abgerufen wird, müssen von einer einzigen, allgemeinen Schleife geregelt werden. Der erste Schritt zu diesem Zweck ist die Festlegung, nach welchem Kriterien wir lokale Gruppe von Drohnen definieren, bei denen Drohnen zu nahe beieinander stehen.
 
 \subsection{Gruppenerkennung}
-\label{sec:gruppenerkennung}
+\label{subsec:gruppenerkennung}
 
 \subsubsection{Grundlagen}
 \label{subsubsec:grundlagen}
 
-Ein einfaches Beispiel für eine Gruppe von zu nahe beieinander stehenden Drohnen ist derjenige, wo jede Drohne zu nahe von all den Rest ist. Die Abbildung \ref{fig:gruppenerkennung_beispiele1} stellt ein Beispiel für diesen Fall dar. In der Praxis gibt es aber kompliziertere Fälle. Abbildung \ref{fig:gruppenerkennung_beispiele2} veranschaulicht einen Fall, wo drei Drohnen eine "`Kettenanordnung"' erzeugen, d.h. jede Drohne befindet sich ausschließlich der nächsten Drohne in der Kette zu nahe. Solche Ketten, die auch über vielfache Zweige verfügen können, werden auch als einzelne Gruppe betrachtet.
-
-
+Ein einfaches Beispiel für eine Gruppe von zu nahe beieinander stehenden Drohnen ist eins, bei dem jede Drohne zu nahe von dem Rest ist. Die Abbildung \ref{fig:gruppenerkennung_beispiele1} stellt ein Beispiel für diesen Fall dar. In der Praxis gibt es aber kompliziertere Fälle. Abbildung \ref{fig:gruppenerkennung_beispiele2} veranschaulicht einen Fall, wo drei Drohnen eine "`Kettenanordnung"' erzeugen, d.h. jede Drohne befindet sich ausschließlich zu nahe an der nächsten Drohne in der Kette. Solche Ketten, die auch über vielfache Zweige verfügen können, werden auch als einzelne Gruppe betrachtet.
 
 \begin{figure}
 \centering
@@ -317,6 +314,88 @@ Ein einfaches Beispiel für eine Gruppe von zu nahe beieinander stehenden Drohne
 \caption{Kettenanordnung}
 \label{fig:gruppenerkennung_beispiele2}
 \end{figure}
+
+
+Nun, wo wir wissen, was eine Gruppe bei dem zentralen Ansatz ist, können wir eine Methode zu ihrer Erkennung einführen.
+
+\subsubsection{Methode}
+\label{subsubsec:methode}
+
+In der Monitoring-Phase unseres MAPE-K prüfen wir zunächst auf mögliche Gruppen von Drohnen, d.H. Stellen, wo eine Drohnenanordnung ausgeführt werden muss.  Wie genau dieses Verfahren in der Monitoring-Phase integriert ist, wird in einem späterem Abschnitt besprochen. Im Moment führen wir jedoch nur die Funktionsweise der Methode ein.
+
+Nun können wir das Konzept der Parent- und Child-Drohne einführen. Jede Drohne verfügt über ihre eigene Gruppe, wo wir zu nahe stehende Drohnen speichern können (siehe Abbildung \ref{fig:gruppenerkennung1}). Diese Drohne ist die Parent-Drohne ihrer Gruppe. Die Child-Drohnen sind also diejenigen, die wir wegen Überschreitung des Grenzwertes der Gruppe hinzufügen.
+
+\begin{figure}
+\centering
+\includegraphics[width = 0.3\textwidth]{gruppenerkennung1}
+\caption{Jede Drohne verfügt über ihre eigene Gruppe}
+\label{fig:gruppenerkennung1}
+\end{figure}
+
+Die Methode zur Gruppenerkennung besteht aus einer Schleife, die über alle Drohnen geht. Der Prozess für jede Drohne bzw. Gruppe ist wie folgt:
+
+
+\begin{enumerate}
+\item Prüfen, ob Drohnen der \textbf{Parent-Drohne} zu nah stehen. Wenn eine Drohne(n) in der Nähe der Parent-Drohne gefunden wird, fügen wir diese der Gruppe als Child-Drohne hinzu.
+\item Prüfen, ob Drohnen den \textbf{Child-Drohnen der Gruppe} zu nah stehen. Wenn eine Drohne(n) in der Nähe der Child-Drohnen gefunden wird, fügen wir diese als Child-Drohne der Gruppe hinzu. 
+\item Schritt \textbf{2} Wiederholen, bis keine Child-Drohne mehr hinzugefügt wird
+\end{enumerate}
+
+In den Abbildungen \ref{fig:gruppenerkennung2}, \ref{fig:gruppenerkennung3} und \ref{fig:gruppenerkennung5} können wir ein Beispiel dieses Verfahren sehen.
+
+\begin{figure}
+\centering
+\includegraphics[width = 0.3\textwidth]{gruppenerkennung2}
+\caption{Im verwendeten Beispiel betrachten wir die Erkennung der Gruppe 1 und deswegen ist die Drohne 1 die Parent-Drohne. GRUPPE 1 = $ \{ $1, 3$ \} $}
+\label{fig:gruppenerkennung2}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[width = 0.3\textwidth]{gruppenerkennung3}
+\caption{Nun sind sowohl die Drohne 3 als auch die Drohne 2 die Child-Drohnen von der Gruppe 1. GRUPPE 1 = $ \{ $1, 3, 2$ \} $}
+\label{fig:gruppenerkennung3}
+\end{figure}
+
+Am Ende des Prozesses haben wir also noch genauso viele Gruppen wie es Drohnen gibt. Das heißt aber nicht, dass wir in Wirklichkeit immer genauso viele Gruppen wie es Drohnen gibt haben, aber jetzt müssen wir die Gruppen filtern, die nicht repräsentativ sind. Damit ist der Prozess fertig.
+
+Zur Optimierung des Verfahrens können wir folgende Weiterentwicklung betrachten: wir haben nicht eine Gruppe für jede Drohne, sondern erstellen sie nach Bedarf bzw. jedes Mal, zwei Drohnen \textbf{die noch keiner Gruppe angehören} zu nahe beieinander stehen. Auf diese Weise gewinnt der Prozess spürbar an Effizienz.
+\begin{figure}
+\centering
+\includegraphics[width = 0.3\textwidth]{gruppenerkennung5}
+\caption{GRUPPE 1 = $ \{ $1, 3, 2$ \} $, GRUPPE 2 = $ \{ $2, 1, 3$ \} $, GRUPPE 3 = $ \{ $3, 1, 2$ \} $}
+\label{fig:gruppenerkennung5}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[width = 0.3\textwidth]{gruppenerkennung4}
+\caption{Wir filtern die Gruppen und behalten nur die, die repräsentativ sind}
+\label{fig:gruppenerkennung4}
+\end{figure}
+
+\subsection{Zentrales MAPE-K}
+\label{subsec:zentralesmapek}
+
+Nun erklären wir die Arbeitsweise des zentralen MAPE-Ks und seiner Phasen:
+
+\begin{itemize}
+\item \textbf{Monitoring-Phase}: Bei dieser Phase wollen wir Informationen über die Drohnen sammeln. Zuerst löschen wir die Gruppen vom letzten Zyklus. Anschließend führen wir die Gruppenerkennungsmethode aus, um diese zu bestimmen.
+\item \textbf{Analysis-Phase}: Im Wesentlichen wird es bei dieser Phase überprüft, ob das Ziel verletzt ist, bzw., ob Drohnen in einer gleichen Gruppe auch  auf einem gleichen Korridor fliegen. Sollte dies der Fall sein, stellen wir das Ziel als "`verletzt"' ein (Goal Violated) und triggern die Planning-Phase. Diese Phase wird über alle Gruppen iteriert.
+\item \textbf{Planning-Phase}: Diese Phase wird erst aufgerufen, wenn die Variable "`triggerPlan"' auf "`TRUE"' gesetzt wird. Ist dies der Fall, sammeln wir Informationen darüber, welche Flugkorridor jede Drohne in der Gruppe belegt und anschließend führen wir die in Abschnitt \ref{sec:drohnenanordnungs} erklärte Drohnenanordnungsmethode. Diese Phase wird über alle Gruppen iteriert.
+\item \textbf{Execution-Phase}: Bei der Execution-Phase handelt es sich um einen redundanten Schritt, denn wir haben keine Steuerungsparameter bei unserer Simulation. Die Existenz diese Phase ermöglicht es uns jedoch, die Planning- und Execution-Phase separat auszuführen und somit die Steuerungsparameter in der Zukunft direkt einbeziehen zu können.
+\end{itemize}
+
+\subsection{Analyse des Ansatzes}
+\label{subsec:analysedesansatzes}
+
+Im Folgendes führen wir eine Analyse der zentralen Ansatz durch. Dieser Ansatz erfordert nur zwei nebenläufige Prozesse und ist daher einfach auszuführen. Die benutzte Gruppenerkennungsmethode ist flexibel und dynamisch: Gruppen werden bei jedem Zyklus dynamisch erstellt und gelöscht, wobei auch komplexe "`Kettengruppen"' erkannt werden. Darüber hinaus sind die Angaben von all den Drohnen (Knowledge) zentralisiert. Das heißt, dass wir von einer einzigen Instanz auf die ganze Kenntnis des Systems zugreiffen können.
+
+Die Dauer jedes MAPE-K Zyklus kann andererseits bei eine großer Anzahl an Drohnen sehr groß werden. Das könnte ein kritisches Problem darstellen, wenn die Dauer des Zyklus die Frequenz überschritt, mit der die MAPE-K  Schleife aufgerufen wird. Dies liegt hauptsächlich an zwei Faktoren. Erstens braucht die Gruppenerkennungsmethode relativ viel Zeit. Zweitens müssen die Analysis und Planning Phasen über jede Gruppe iteriert werden.
+
+\subsection{Überprüfung der Ziele (?)}
+
+In dieser Sektion haben wir den zentralen Ansatz vorgestellt, seine Arbeitsweise erklärt und eine kurze Analyse über seine Fähigkeiten durchgeführt. Nun führen wir den dezentralen Ansatz ein.
 
 \section{Kollisionsvermeidung: Dezentraler Ansatz}
 \label{sec:dezentral}
